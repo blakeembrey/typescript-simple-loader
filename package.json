@@ -1,0 +1,60 @@
+{
+  "name": "typescript-simple-loader",
+  "version": "0.0.0",
+  "description": "Feature complete TypeScript loader for webpack",
+  "main": "dist/typescript-simple-loader.js",
+  "files": [
+    "dist/",
+    "!dist/**/*.spec.js",
+    "typings/",
+    "typescript-simple-loader.d.ts",
+    "LICENSE"
+  ],
+  "scripts": {
+    "lint": "# TODO",
+    "build": "npm run build-ts",
+    "build-ts": "tsc",
+    "test-spec": "mocha dist/**/*.spec.js -R spec --bail",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- dist/**/*.spec.js -R spec --bail",
+    "test": "npm run build && npm run lint && npm run test-cov",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/blakeembrey/typescript-simple-loader.git"
+  },
+  "typescript": {
+    "definition": "typescript-simple-loader.d.ts"
+  },
+  "keywords": [
+    "style",
+    "css",
+    "object",
+    "react",
+    "inline"
+  ],
+  "author": {
+    "name": "Blake Embrey",
+    "email": "hello@blakeembrey.com",
+    "url": "http://blakeembrey.me"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blakeembrey/typescript-simple-loader/issues"
+  },
+  "homepage": "https://github.com/blakeembrey/typescript-simple-loader",
+  "devDependencies": {
+    "chai": "^2.1.0",
+    "istanbul": "^0.3.6",
+    "mocha": "^2.1.0",
+    "pre-commit": "^1.0.6"
+  },
+  "peerDependencies": {
+    "typescript": "^1.5.0-alpha"
+  },
+  "dependencies": {
+    "loader-utils": "^0.2.7",
+    "tsconfig": "0.0.3",
+    "xtend": "^4.0.0"
+  }
+}

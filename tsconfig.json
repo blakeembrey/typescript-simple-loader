@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "dist",
+    "module": "commonjs",
+    "declaration": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "sourceMap": true
+  },
+  "files": [
+    "src/typescript-simple-loader.ts",
+    "src/typescript-simple-loader.spec.ts",
+    "typings/tsd.d.ts"
+  ]
+}
