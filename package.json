@@ -7,6 +7,7 @@
     "dist/",
     "!dist/**/*.spec.js",
     "typings/",
+    "screenshot.png",
     "typescript-simple-loader.d.ts",
     "LICENSE"
   ],

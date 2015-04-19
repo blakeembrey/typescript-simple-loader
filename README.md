@@ -7,6 +7,8 @@
 
 > Feature complete TypeScript loader for webpack.
 
+![Webpack Hot Module Replacement with TypeScript](https://github.com/blakeembrey/typescript-simple-loader/raw/master/screenshot.png)
+
 ## Installation
 
 ```
