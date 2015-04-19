@@ -3,7 +3,7 @@ import { readFileSync, statSync } from 'fs'
 import { EOL } from 'os'
 import * as ts from 'typescript'
 import extend = require('xtend')
-import { parseQuery } from 'loader-utils'
+import { parseQuery, urlToRequest } from 'loader-utils'
 import { getProjectSync } from 'tsconfig'
 
 interface WebPackLoader {
@@ -231,7 +231,7 @@ class DiagosticError implements Error {
     this.message = formatDiagnostic(this.diagnostic)
 
     if (this.diagnostic.file) {
-      this.file = `./${relative(context, this.diagnostic.file.fileName)}`
+      this.file = urlToRequest(relative(context, this.diagnostic.file.fileName))
     }
   }
 }
