@@ -144,7 +144,11 @@ function createService (files: FilesMap, loader: WebPackLoader) {
 
   let serviceHost: ts.LanguageServiceHost = {
     getScriptFileNames (): string[] {
-      return config.fileNames
+      // Return an array of all file names. We can't return just the default
+      // files because webpack may have traversed through a regular JS file
+      // back to a TypeScript file and if we don't have that file in the array,
+      // TypeScript will give us a file not found compilation error.
+      return defaultFiles.concat(Object.keys(files))
     },
     getScriptVersion (fileName) {
       return files[fileName] && files[fileName].version.toString()
