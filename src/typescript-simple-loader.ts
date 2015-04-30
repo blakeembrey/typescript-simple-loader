@@ -1,10 +1,9 @@
-import { resolve, relative } from 'path'
+import { resolve, relative, dirname } from 'path'
 import { readFileSync, statSync } from 'fs'
 import { EOL } from 'os'
 import * as ts from 'typescript'
 import extend = require('xtend')
 import { parseQuery, urlToRequest } from 'loader-utils'
-import { getProjectSync } from 'tsconfig'
 
 interface WebPackLoader {
   cacheable(flag?: boolean): void
@@ -99,28 +98,27 @@ function loader (content: string): void {
  */
 function createService (files: FilesMap, loader: WebPackLoader) {
   let context = loader.options.context
-  let tsconfig = getProjectSync(context)
   let defaultFiles: string[] = [loader.resourcePath]
+  let configFile = findConfigFile(dirname(loader.resourcePath))
 
   let compilerOptions: any = {
     target: 'es5',
     module: 'commonjs'
   }
 
-  if (tsconfig) {
-    let files = tsconfig.project.files
-      .map((file) => {
-        return resolve(tsconfig.projectFileDirectory, file)
-      })
-      .filter((file) => {
-        return file !== loader.resourcePath
-      })
+  if (configFile) {
+    let tsconfig = ts.readConfigFile(configFile)
+    let configDir = dirname(configFile)
+
+    let files = tsconfig.files
+      .map((file: string) => resolve(configDir, file))
+      .filter((file: string) => file !== loader.resourcePath)
 
     // Include `tsconfig.json` files in default files to load.
     defaultFiles = defaultFiles.concat(files)
 
     // Extend default compiler options with `tsconfig.json`.
-    compilerOptions = extend(compilerOptions, tsconfig.project.compilerOptions)
+    compilerOptions = extend(compilerOptions, tsconfig.compilerOptions)
   }
 
   // Extend compiler options with the webpack options.
@@ -305,6 +303,26 @@ function getLoaderInstance (loader: WebPackLoader): LoaderInstance {
  */
 function isDefinition (fileName: string): boolean {
   return /\.d\.ts$/.test(fileName)
+}
+
+/**
+ * Find the root config file.
+ *
+ * @param  {string} path
+ * @return {string}
+ */
+function findConfigFile (path: string): string {
+  var dir = statSync(path).isDirectory() ? path : dirname(path)
+
+  do {
+    var configFile = resolve(dir, 'tsconfig.json')
+
+    if (fileExists(configFile)) {
+      return configFile
+    }
+
+    dir = dirname(dir)
+  } while (statSync(dir).isDirectory())
 }
 
 export = loader
