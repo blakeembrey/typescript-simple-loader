@@ -315,13 +315,19 @@ function findConfigFile (path: string): string {
   var dir = statSync(path).isDirectory() ? path : dirname(path)
 
   do {
-    var configFile = resolve(dir, 'tsconfig.json')
+    let configFile = resolve(dir, 'tsconfig.json')
 
     if (fileExists(configFile)) {
       return configFile
     }
 
-    dir = dirname(dir)
+    let parentDir = dirname(dir)
+
+    if (dir === parentDir) {
+      return
+    }
+
+    dir = parentDir
   } while (statSync(dir).isDirectory())
 }
 
