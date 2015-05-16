@@ -28,11 +28,12 @@
     "definition": "typescript-simple-loader.d.ts"
   },
   "keywords": [
-    "style",
-    "css",
-    "object",
-    "react",
-    "inline"
+    "typescript",
+    "loader",
+    "webpack-loader",
+    "webpack",
+    "ts",
+    "compiler"
   ],
   "author": {
     "name": "Blake Embrey",
