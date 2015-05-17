@@ -132,7 +132,6 @@ function createService (files: FilesMap, loader: WebPackLoader) {
 
   if (config.errors.length) {
     config.errors.forEach((error) => loader.emitError(formatDiagnostic(error)))
-    return
   }
 
   let defaultLibFileName = ts.getDefaultLibFilePath(config.options)
