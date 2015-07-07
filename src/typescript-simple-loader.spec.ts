@@ -68,4 +68,23 @@ describe('fixtures', function () {
       done
     )
   })
+
+  it('ignore warnings', function (done) {
+    test(
+      join(FIXTURES_DIR, 'ignore-warnings', 'source.ts'),
+      join(FIXTURES_DIR, 'ignore-warnings', 'output.js'),
+      {
+        module: {
+          loaders: [
+            {
+              test: /\.tsx?$/,
+              loader: join(__dirname, '..') + '?ignoreWarnings[]=2304',
+              exclude: /node_modules/
+            }
+          ]
+        }
+      },
+      done
+    )
+  })
 })

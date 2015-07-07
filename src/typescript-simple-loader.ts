@@ -33,6 +33,7 @@ interface SourceMap {
 interface Options {
   compiler?: string
   configFile?: string
+  ignoreWarnings?: string[]
 }
 
 type FilesMap = ts.Map<{ version: number, text: string }>
@@ -234,7 +235,12 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
     program.getGlobalDiagnostics()
       .concat(program.getSemanticDiagnostics())
       .forEach((diagnostic) => {
-        compilation.warnings.push(new DiagnosticError(diagnostic, context, TS))
+        if (
+          !Array.isArray(options.ignoreWarnings) ||
+          options.ignoreWarnings.indexOf(String(diagnostic.code)) === -1
+        ) {
+          compilation.warnings.push(new DiagnosticError(diagnostic, context, TS))
+        }
       })
 
 
@@ -269,7 +275,7 @@ function formatDiagnostic (diagnostic: ts.Diagnostic, TS: typeof ts): string {
   if (diagnostic.file) {
     const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start)
 
-    return `(${line + 1},${character + 1}): ${message}`
+    return `(${line + 1},${character + 1}): ${message} (${diagnostic.code})`
   }
 
   return message
