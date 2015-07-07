@@ -37,7 +37,7 @@ interface LoaderInstance {
   service: ts.LanguageService
 }
 
-var currentLoader: WebPackLoader
+let currentLoader: WebPackLoader
 
 const loaderInstances: { [key: number]: LoaderInstance } = {}
 
@@ -47,9 +47,9 @@ const loaderInstances: { [key: number]: LoaderInstance } = {}
  * @param {string} content
  */
 function loader (content: string): void {
-  let loader: WebPackLoader = this
-  let fileName = this.resourcePath
-  let { files, service } = getLoaderInstance(this)
+  const loader: WebPackLoader = this
+  const fileName = this.resourcePath
+  const { files, service } = getLoaderInstance(this)
   let file = files[fileName]
 
   this.cacheable()
@@ -64,7 +64,7 @@ function loader (content: string): void {
   file.version++
 
   currentLoader = loader
-  let output = service.getEmitOutput(fileName)
+  const output = service.getEmitOutput(fileName)
   currentLoader = undefined
 
   service.getSyntacticDiagnostics(fileName)
@@ -77,7 +77,7 @@ function loader (content: string): void {
     return
   }
 
-  let result = output.outputFiles[loader.sourceMap ? 1 : 0].text
+  const result = output.outputFiles[loader.sourceMap ? 1 : 0].text
   let sourceMap: SourceMap
 
   if (loader.sourceMap) {
@@ -97,9 +97,9 @@ function loader (content: string): void {
  * @param {WebPackLoader} loader
  */
 function createService (files: FilesMap, loader: WebPackLoader) {
-  let context = loader.options.context
+  const context = loader.options.context
+  const configFile = findConfigFile(dirname(loader.resourcePath))
   let defaultFiles: string[] = [loader.resourcePath]
-  let configFile = findConfigFile(dirname(loader.resourcePath))
 
   let compilerOptions: any = {
     target: 'es5',
@@ -107,10 +107,10 @@ function createService (files: FilesMap, loader: WebPackLoader) {
   }
 
   if (configFile) {
-    let tsconfig = ts.readConfigFile(configFile)
-    let configDir = dirname(configFile)
+    const tsconfig = ts.readConfigFile(configFile)
+    const configDir = dirname(configFile)
 
-    let files = tsconfig.files
+    const files = tsconfig.files
       .map((file: string) => resolve(configDir, file))
       .filter((file: string) => file !== loader.resourcePath)
 
@@ -125,7 +125,7 @@ function createService (files: FilesMap, loader: WebPackLoader) {
   compilerOptions = extend(compilerOptions, parseQuery(loader.query))
   compilerOptions.sourceMap = loader.sourceMap
 
-  let config = ts.parseConfigFile({
+  const config = ts.parseConfigFile({
     files: defaultFiles,
     compilerOptions
   })
@@ -134,12 +134,12 @@ function createService (files: FilesMap, loader: WebPackLoader) {
     config.errors.forEach((error) => loader.emitError(formatDiagnostic(error)))
   }
 
-  let defaultLibFileName = ts.getDefaultLibFilePath(config.options)
+  const defaultLibFileName = ts.getDefaultLibFilePath(config.options)
 
   // Add the default library to default files.
   config.fileNames.push(defaultLibFileName)
 
-  let serviceHost: ts.LanguageServiceHost = {
+  const serviceHost: ts.LanguageServiceHost = {
     getScriptFileNames (): string[] {
       // Return an array of all file names. We can't return just the default
       // files because webpack may have traversed through a regular JS file
@@ -151,8 +151,8 @@ function createService (files: FilesMap, loader: WebPackLoader) {
       return files[fileName] && files[fileName].version.toString()
     },
     getScriptSnapshot (fileName: string): ts.IScriptSnapshot {
+      const exists = fileExists(fileName)
       let file = files[fileName]
-      let exists = fileExists(fileName)
 
       // Load all files from the filesystem when they don't exist yet. This
       // is required for definition files and nested type information.
@@ -244,10 +244,10 @@ function fileExists (fileName: string): boolean {
  * @return {string}
  */
 function formatDiagnostic (diagnostic: ts.Diagnostic): string {
-  let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
+  const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
 
   if (diagnostic.file) {
-    let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start)
+    const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start)
 
     return `(${line + 1},${character + 1}): ${message}`
   }
@@ -279,15 +279,15 @@ class DiagosticError implements Error {
  * @return {LoaderInstance}
  */
 function getLoaderInstance (loader: WebPackLoader): LoaderInstance {
-  let index = loader.loaderIndex
+  const index = loader.loaderIndex
 
   if (loaderInstances[index]) {
     return loaderInstances[index]
   }
 
-  let files: FilesMap = {}
-  let service = createService(files, loader)
-  let instance: LoaderInstance = { files, service }
+  const files: FilesMap = {}
+  const service = createService(files, loader)
+  const instance: LoaderInstance = { files, service }
 
   loaderInstances[index] = instance
 
@@ -314,13 +314,13 @@ function findConfigFile (path: string): string {
   var dir = statSync(path).isDirectory() ? path : dirname(path)
 
   do {
-    let configFile = resolve(dir, 'tsconfig.json')
+    const configFile = resolve(dir, 'tsconfig.json')
 
     if (fileExists(configFile)) {
       return configFile
     }
 
-    let parentDir = dirname(dir)
+    const parentDir = dirname(dir)
 
     if (dir === parentDir) {
       return
