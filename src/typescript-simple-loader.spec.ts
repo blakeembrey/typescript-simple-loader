@@ -3,7 +3,6 @@ import { readFile } from 'fs'
 import { expect } from 'chai'
 import extend = require('xtend')
 import webpack = require('webpack')
-import tsLoader = require('./typescript-simple-loader')
 
 const FIXTURES_DIR = join(__dirname, '..', 'fixtures')
 const TMP_DIR = join(__dirname, '..', '.tmp')
