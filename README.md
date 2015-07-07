@@ -54,13 +54,14 @@ You can set options by passing them in with the query string.
 loaders: [
   {
     test: /\.ts$/,
-    loader: 'typescript-simple-loader?compiler=ntypescript&configFile=tsconfig.json'
+    loader: 'typescript-simple-loader?compiler=ntypescript&configFile=tsconfig.json&ignoreWarnings[]=2304'
   }
 ]
 ```
 
 * **compiler** Set a custom TypeScript compiler compatible with `typescript@>=1.5-alpha`
 * **configFile** Manually set the location of the `tsconfig.json` file
+* **ignoreWarnings** Set an array of TypeScript diagnostic codes to ignore
 
 ## License
 
