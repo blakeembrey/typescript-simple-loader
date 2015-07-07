@@ -3,4 +3,5 @@
 /// <reference path="node/node.d.ts" />
 /// <reference path="_custom/xtend.d.ts" />
 /// <reference path="_custom/loader-utils.d.ts" />
+/// <reference path="_custom/webpack.d.ts" />
 /// <reference path="../node_modules/typescript/bin/typescript.d.ts" />

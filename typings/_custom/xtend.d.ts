@@ -1,11 +1,11 @@
 declare module 'xtend/mutable' {
-  function extend<T> (dest: T, ...src: Object[]): T
+  function extend <T> (dest: T, ...src: Object[]): T
 
   export = extend
 }
 
 declare module 'xtend/immutable' {
-  function extend (...src: Object[]): Object
+  function extend <T> (dest: T, ...src: Object[]): T
 
   export = extend
 }

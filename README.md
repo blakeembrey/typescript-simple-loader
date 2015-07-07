@@ -21,7 +21,7 @@ npm install typescript-simple-loader --save
 * Supports Source Maps
 * Emits *all* TypeScript issues (including external dependencies like `.d.ts` files)
 * Emits semantic diagnostics as webpack warnings (doesn't block compilation)
-* Watches and reloads every compilation dependency (yes, `d.ts` files too)
+* Watches and reloads every compilation dependency (yes, even `d.ts` files)
 
 ## Usage
 
@@ -42,22 +42,25 @@ module.exports = {
 }
 ```
 
-### Override Compiler Options
+### Load `tsconfig.json`
 
-You can override specific compilation options by passing them in with the query string.
+The loader automatically loads `tsconfig.json` options and files, no additional configuration required.
+
+### Configuration Options
+
+You can set options by passing them in with the query string.
 
 ```js
 loaders: [
   {
     test: /\.ts$/,
-    loader: 'typescript-simple-loader?target=es6'
+    loader: 'typescript-simple-loader?compiler=ntypescript&configFile=tsconfig.json'
   }
 ]
 ```
 
-### Load `tsconfig.json`
-
-The loader automatically loads `tsconfig.json` options and files, no extra effort required.
+* **compiler** Set a custom TypeScript compiler compatible with `typescript@>=1.5-alpha`
+* **configFile** Manually set the location of the `tsconfig.json` file
 
 ## License
 

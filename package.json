@@ -14,7 +14,7 @@
   "scripts": {
     "lint": "# TODO",
     "build": "npm run build-ts",
-    "build-ts": "tsc",
+    "build-ts": "rm -rf dist && tsc",
     "test-spec": "mocha dist/**/*.spec.js -R spec --bail",
     "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- dist/**/*.spec.js -R spec --bail",
     "test": "npm run build && npm run lint && npm run test-cov",
@@ -46,10 +46,13 @@
   },
   "homepage": "https://github.com/blakeembrey/typescript-simple-loader",
   "devDependencies": {
-    "chai": "^2.1.0",
-    "istanbul": "^0.3.6",
+    "chai": "^3.0.0",
+    "istanbul": "gotwarlost/istanbul#source-map",
     "mocha": "^2.1.0",
-    "pre-commit": "^1.0.6"
+    "node-libs-browser": "^0.5.2",
+    "ntypescript": "^1.201507071002.1",
+    "pre-commit": "^1.0.6",
+    "webpack": "^1.10.1"
   },
   "peerDependencies": {
     "typescript": "^1.5.0-alpha"

@@ -30,6 +30,11 @@ interface SourceMap {
   sourcesContent: string[]
 }
 
+interface Options {
+  compiler?: string
+  configFile?: string
+}
+
 type FilesMap = ts.Map<{ version: number, text: string }>
 
 interface LoaderInstance {
@@ -37,14 +42,18 @@ interface LoaderInstance {
   service: ts.LanguageService
 }
 
-let currentLoader: WebPackLoader
+/**
+ * Hold a cache of loader instances.
+ */
+const loaderInstances: { [id: string]: LoaderInstance } = {}
 
-const loaderInstances: { [key: number]: LoaderInstance } = {}
+/**
+ * Keep temporary references to the current webpack loader for dependencies.
+ */
+let currentLoader: WebPackLoader
 
 /**
  * Support TypeScript in Webpack.
- *
- * @param {string} content
  */
 function loader (content: string): void {
   const loader: WebPackLoader = this
@@ -54,7 +63,7 @@ function loader (content: string): void {
 
   this.cacheable()
 
-  // Only set content on the first load. The watch task maintains reloads and
+  // Set content on the first load. The watch task maintains reloads and
   // the version doesn't need to change when every dependency is re-run.
   if (!file) {
     file = files[fileName] = { version: 0, text: '' }
@@ -66,11 +75,6 @@ function loader (content: string): void {
   currentLoader = loader
   const output = service.getEmitOutput(fileName)
   currentLoader = undefined
-
-  service.getSyntacticDiagnostics(fileName)
-    .forEach((diagnostic) => {
-      loader.emitError(formatDiagnostic(diagnostic))
-    })
 
   if (output.emitSkipped) {
     loader.callback(new Error(`${fileName}: File not found`))
@@ -91,55 +95,63 @@ function loader (content: string): void {
 }
 
 /**
- * Create a TypeScript language service from the first instance.
- *
- * @param {FilesMap}      files
- * @param {WebPackLoader} loader
+ * Load a TypeScript configuration file.
  */
-function createService (files: FilesMap, loader: WebPackLoader) {
-  const context = loader.options.context
-  const configFile = findConfigFile(dirname(loader.resourcePath))
-  let defaultFiles: string[] = [loader.resourcePath]
+function loadConfigFile (fileName: string): any {
+  return JSON.parse(readFileSync(fileName, 'utf-8'))
+}
 
-  let compilerOptions: any = {
-    target: 'es5',
-    module: 'commonjs'
+/**
+ * Read the configuration into an object.
+ */
+function readConfigFile (configFile: string, loader: WebPackLoader, additionalOptions?: any) {
+  let config = {
+    files: <string[]> [],
+    compilerOptions: {}
   }
 
   if (configFile) {
-    const tsconfig = ts.readConfigFile(configFile)
+    const tsconfig = loadConfigFile(configFile)
     const configDir = dirname(configFile)
 
+    config = extend(config, tsconfig)
+
+    // Resolve and include `tsconfig.json` files.
     if (Array.isArray(tsconfig.files)) {
-      const files = tsconfig.files
-        .map((file: string) => resolve(configDir, file))
-        .filter((file: string) => file !== loader.resourcePath)
-
-      // Include `tsconfig.json` files in default files to load.
-      defaultFiles = defaultFiles.concat(files)
+      config.files = config.files.map((file: string) => resolve(configDir, file))
     }
-
-    // Extend default compiler options with `tsconfig.json`.
-    compilerOptions = extend(compilerOptions, tsconfig.compilerOptions)
   }
 
-  // Extend compiler options with the webpack options.
-  compilerOptions = extend(compilerOptions, parseQuery(loader.query))
-  compilerOptions.sourceMap = loader.sourceMap
-
-  const config = ts.parseConfigFile({
-    files: defaultFiles,
-    compilerOptions
+  // Merge all the compiler options sources together.
+  config.compilerOptions = extend({
+    target: 'es5',
+    module: 'commonjs'
+  }, config.compilerOptions, additionalOptions, {
+    sourceMap: loader.sourceMap
   })
 
-  if (config.errors.length) {
-    config.errors.forEach((error) => loader.emitError(formatDiagnostic(error)))
-  }
+  return config
+}
 
-  const defaultLibFileName = ts.getDefaultLibFilePath(config.options)
+/**
+ * Create a TypeScript language service from the first instance.
+ */
+function createService (files: FilesMap, loader: WebPackLoader, options: Options) {
+  const context = loader.context
+  const rootFile = loader.resourcePath
 
-  // Add the default library to default files.
-  config.fileNames.push(defaultLibFileName)
+  // Allow custom TypeScript compilers to be used.
+  const TS: typeof ts = require(options.compiler || 'typescript')
+
+  // Allow `configFile` option to override `tsconfig.json` lookup.
+  const configFile = options.configFile ?
+    resolve(context, options.configFile) :
+    findConfigFile(dirname(rootFile))
+
+  let config = TS.parseConfigFile(readConfigFile(configFile, loader))
+
+  // Emit configuration errors.
+  config.errors.forEach((error) => loader.emitError(formatDiagnostic(error)))
 
   const serviceHost: ts.LanguageServiceHost = {
     getScriptFileNames (): string[] {
@@ -147,7 +159,7 @@ function createService (files: FilesMap, loader: WebPackLoader) {
       // files because webpack may have traversed through a regular JS file
       // back to a TypeScript file and if we don't have that file in the array,
       // TypeScript will give us a file not found compilation error.
-      return defaultFiles.concat(Object.keys(files))
+      return config.fileNames.concat(Object.keys(files))
     },
     getScriptVersion (fileName) {
       return files[fileName] && files[fileName].version.toString()
@@ -170,12 +182,12 @@ function createService (files: FilesMap, loader: WebPackLoader) {
           }
         }
 
-        // Reload the loader to refresh when any files change.
+        // Make the loader refresh when any external files change.
         if (currentLoader && isDefinition(fileName)) {
           currentLoader.addDependency(fileName)
         }
 
-        return ts.ScriptSnapshot.fromString(file.text)
+        return TS.ScriptSnapshot.fromString(file.text)
       }
 
       delete files[fileName]
@@ -184,8 +196,12 @@ function createService (files: FilesMap, loader: WebPackLoader) {
     getScriptIsOpen: () => true,
     getNewLine: () => EOL,
     getCompilationSettings: () => config.options,
-    getDefaultLibFileName: (options: ts.CompilerOptions) => defaultLibFileName
+    getDefaultLibFileName: (options: ts.CompilerOptions) => {
+      return TS.getDefaultLibFilePath(config.options)
+    }
   }
+
+  const service = TS.createLanguageService(serviceHost, TS.createDocumentRegistry())
 
   // Hook into the watch plugin to update file dependencies in TypeScript
   // before the files are reloaded. This is required because we need type
@@ -197,6 +213,7 @@ function createService (files: FilesMap, loader: WebPackLoader) {
       .forEach((fileName) => {
         const file = files[fileName]
 
+        // Reload when a definition changes.
         if (file && isDefinition(fileName)) {
           file.text = readFileSync(fileName, 'utf8')
           file.version++
@@ -222,14 +239,11 @@ function createService (files: FilesMap, loader: WebPackLoader) {
     cb()
   })
 
-  return ts.createLanguageService(serviceHost, ts.createDocumentRegistry())
+  return service
 }
 
 /**
  * Check a file exists in the file system.
- *
- * @param  {string}  fileName
- * @return {boolean}
  */
 function fileExists (fileName: string): boolean {
   try {
@@ -241,9 +255,6 @@ function fileExists (fileName: string): boolean {
 
 /**
  * Format a diagnostic object into a string.
- *
- * @param  {ts.Diagnostic} diagnostic
- * @return {string}
  */
 function formatDiagnostic (diagnostic: ts.Diagnostic): string {
   const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
@@ -281,26 +292,24 @@ class DiagosticError implements Error {
  * @return {LoaderInstance}
  */
 function getLoaderInstance (loader: WebPackLoader): LoaderInstance {
-  const index = loader.loaderIndex
+  const id = loader.options.context + loader.query
+  const query = parseQuery(loader.query)
 
-  if (loaderInstances[index]) {
-    return loaderInstances[index]
+  if (loaderInstances[id]) {
+    return loaderInstances[id]
   }
 
   const files: FilesMap = {}
-  const service = createService(files, loader)
+  const service = createService(files, loader, query)
   const instance: LoaderInstance = { files, service }
 
-  loaderInstances[index] = instance
+  loaderInstances[id] = instance
 
   return instance
 }
 
 /**
  * Check if a file is a defintion.
- *
- * @param  {string}  fileName
- * @return {boolean}
  */
 function isDefinition (fileName: string): boolean {
   return /\.d\.ts$/.test(fileName)
@@ -308,9 +317,6 @@ function isDefinition (fileName: string): boolean {
 
 /**
  * Find the root config file.
- *
- * @param  {string} path
- * @return {string}
  */
 function findConfigFile (path: string): string {
   var dir = statSync(path).isDirectory() ? path : dirname(path)
