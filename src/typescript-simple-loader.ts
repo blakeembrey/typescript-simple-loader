@@ -184,8 +184,9 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
           }
         }
 
-        // Make the loader refresh when any external files change.
-        if (currentLoader && isDefinition(fileName)) {
+        // Always add dependencies. This dependency could be a `.d.ts` file or
+        // an external module that failed to compile the first time.
+        if (currentLoader) {
           currentLoader.addDependency(fileName)
         }
 
