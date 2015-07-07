@@ -110,12 +110,14 @@ function createService (files: FilesMap, loader: WebPackLoader) {
     const tsconfig = ts.readConfigFile(configFile)
     const configDir = dirname(configFile)
 
-    const files = tsconfig.files
-      .map((file: string) => resolve(configDir, file))
-      .filter((file: string) => file !== loader.resourcePath)
+    if (Array.isArray(tsconfig.files)) {
+      const files = tsconfig.files
+        .map((file: string) => resolve(configDir, file))
+        .filter((file: string) => file !== loader.resourcePath)
 
-    // Include `tsconfig.json` files in default files to load.
-    defaultFiles = defaultFiles.concat(files)
+      // Include `tsconfig.json` files in default files to load.
+      defaultFiles = defaultFiles.concat(files)
+    }
 
     // Extend default compiler options with `tsconfig.json`.
     compilerOptions = extend(compilerOptions, tsconfig.compilerOptions)
