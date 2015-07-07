@@ -231,13 +231,17 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
   loader._compiler.plugin('emit', function (compilation: any, cb: () => void) {
     const program = service.getProgram()
 
-    program.getSemanticDiagnostics().forEach((diagnostic) => {
-      compilation.warnings.push(new DiagosticError(diagnostic, loader.options.context, TS))
-    })
+    program.getGlobalDiagnostics()
+      .concat(program.getSemanticDiagnostics())
+      .forEach((diagnostic) => {
+        compilation.warnings.push(new DiagnosticError(diagnostic, context, TS))
+      })
 
-    program.getSyntacticDiagnostics().forEach((diagnostic) => {
-      compilation.errors.push(new DiagosticError(diagnostic, loader.options.context, TS))
-    })
+
+    program.getSyntacticDiagnostics()
+      .forEach((diagnostic) => {
+        compilation.errors.push(new DiagnosticError(diagnostic, context, TS))
+      })
 
     cb()
   })
@@ -274,7 +278,7 @@ function formatDiagnostic (diagnostic: ts.Diagnostic, TS: typeof ts): string {
 /**
  * Create a Webpack-compatible diagnostic error.
  */
-class DiagosticError implements Error {
+class DiagnosticError implements Error {
   name = 'DiagnosticError'
   message: string
   file: string
