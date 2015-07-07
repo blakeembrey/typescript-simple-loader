@@ -104,7 +104,7 @@ function loadConfigFile (fileName: string): any {
 /**
  * Read the configuration into an object.
  */
-function readConfigFile (configFile: string, loader: WebPackLoader, additionalOptions?: any) {
+function readConfigFile (configFile: string, loader: WebPackLoader, TS: typeof ts) {
   let config = {
     files: <string[]> [],
     compilerOptions: {}
@@ -122,11 +122,11 @@ function readConfigFile (configFile: string, loader: WebPackLoader, additionalOp
     }
   }
 
-  // Merge all the compiler options sources together.
+  // Merge all possible compiler options together.
   config.compilerOptions = extend({
     target: 'es5',
     module: 'commonjs'
-  }, config.compilerOptions, additionalOptions, {
+  }, config.compilerOptions, {
     sourceMap: loader.sourceMap
   })
 
@@ -148,10 +148,12 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
     resolve(context, options.configFile) :
     findConfigFile(dirname(rootFile))
 
-  let config = TS.parseConfigFile(readConfigFile(configFile, loader))
+  let config = TS.parseConfigFile(readConfigFile(configFile, loader, TS), TS.sys, configFile)
 
   // Emit configuration errors.
-  config.errors.forEach((error) => loader.emitError(formatDiagnostic(error)))
+  config.errors.forEach((error: ts.Diagnostic) => {
+    loader.emitError(formatDiagnostic(error, TS))
+  })
 
   const serviceHost: ts.LanguageServiceHost = {
     getScriptFileNames (): string[] {
@@ -229,11 +231,11 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
     const program = service.getProgram()
 
     program.getSemanticDiagnostics().forEach((diagnostic) => {
-      compilation.warnings.push(new DiagosticError(diagnostic, loader.options.context))
+      compilation.warnings.push(new DiagosticError(diagnostic, loader.options.context, TS))
     })
 
     program.getSyntacticDiagnostics().forEach((diagnostic) => {
-      compilation.errors.push(new DiagosticError(diagnostic, loader.options.context))
+      compilation.errors.push(new DiagosticError(diagnostic, loader.options.context, TS))
     })
 
     cb()
@@ -256,8 +258,8 @@ function fileExists (fileName: string): boolean {
 /**
  * Format a diagnostic object into a string.
  */
-function formatDiagnostic (diagnostic: ts.Diagnostic): string {
-  const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
+function formatDiagnostic (diagnostic: ts.Diagnostic, TS: typeof ts): string {
+  const message = TS.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
 
   if (diagnostic.file) {
     const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start)
@@ -276,11 +278,11 @@ class DiagosticError implements Error {
   message: string
   file: string
 
-  constructor (public diagnostic: ts.Diagnostic, public context: string) {
-    this.message = formatDiagnostic(this.diagnostic)
+  constructor (diagnostic: ts.Diagnostic, context: string, TS: typeof ts) {
+    this.message = formatDiagnostic(diagnostic, TS)
 
-    if (this.diagnostic.file) {
-      this.file = urlToRequest(relative(context, this.diagnostic.file.fileName))
+    if (diagnostic.file) {
+      this.file = urlToRequest(relative(context, diagnostic.file.fileName))
     }
   }
 }
