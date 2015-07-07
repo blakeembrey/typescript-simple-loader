@@ -77,7 +77,7 @@ function loader (content: string): void {
   currentLoader = undefined
 
   if (output.emitSkipped) {
-    loader.callback(new Error(`${fileName}: File not found`))
+    loader.callback(new Error(`Emitting ${fileName} failed`))
     return
   }
 
