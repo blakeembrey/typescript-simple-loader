@@ -185,6 +185,41 @@ function createService (files: FilesMap, loader: WebPackLoader) {
     getDefaultLibFileName: (options: ts.CompilerOptions) => defaultLibFileName
   }
 
+  // Hook into the watch plugin to update file dependencies in TypeScript
+  // before the files are reloaded. This is required because we need type
+  // information to propagate upward and Webpack reloads from the top down.
+  loader._compiler.plugin('watch-run', function (watching: any, cb: () => void) {
+    const mtimes = watching.compiler.watchFileSystem.watcher.mtimes
+
+    Object.keys(mtimes)
+      .forEach((fileName) => {
+        const file = files[fileName]
+
+        if (file && isDefinition(fileName)) {
+          file.text = readFileSync(fileName, 'utf8')
+          file.version++
+        }
+      })
+
+    cb()
+  })
+
+  // Push all semantic and outstanding compilation errors on emit. This allows
+  // us to notify of all errors, including files outside webpacks knowledge.
+  loader._compiler.plugin('emit', function (compilation: any, cb: () => void) {
+    const program = service.getProgram()
+
+    program.getSemanticDiagnostics().forEach((diagnostic) => {
+      compilation.warnings.push(new DiagosticError(diagnostic, loader.options.context))
+    })
+
+    program.getSyntacticDiagnostics().forEach((diagnostic) => {
+      compilation.errors.push(new DiagosticError(diagnostic, loader.options.context))
+    })
+
+    cb()
+  })
+
   return ts.createLanguageService(serviceHost, ts.createDocumentRegistry())
 }
 
@@ -255,41 +290,6 @@ function getLoaderInstance (loader: WebPackLoader): LoaderInstance {
   let instance: LoaderInstance = { files, service }
 
   loaderInstances[index] = instance
-
-  // Hook into the watch plugin to update file dependencies in TypeScript
-  // before the files are reloaded. This is required because we need type
-  // information to propagate upward and Webpack reloads from the top down.
-  loader._compiler.plugin('watch-run', function (watching: any, cb: () => void) {
-    let mtimes = watching.compiler.watchFileSystem.watcher.mtimes
-
-    Object.keys(mtimes)
-      .forEach((fileName) => {
-        let file = files[fileName]
-
-        if (file && isDefinition(fileName)) {
-          file.text = readFileSync(fileName, 'utf8')
-          file.version++
-        }
-      })
-
-    cb()
-  })
-
-  // Push all semantic and outstanding compilation errors on emit. This allows
-  // us to notify of all errors, including files outside webpacks knowledge.
-  loader._compiler.plugin('emit', function (compilation: any, cb: () => void) {
-    let program = service.getProgram()
-
-    program.getSemanticDiagnostics().forEach((diagnostic) => {
-      compilation.warnings.push(new DiagosticError(diagnostic, loader.options.context))
-    })
-
-    program.getSyntacticDiagnostics().forEach((diagnostic) => {
-      compilation.errors.push(new DiagosticError(diagnostic, loader.options.context))
-    })
-
-    cb()
-  })
 
   return instance
 }
