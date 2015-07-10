@@ -44,11 +44,11 @@ module.exports = {
 
 ### Load `tsconfig.json`
 
-The loader automatically loads `tsconfig.json` options and files, no additional configuration required.
+The loader automatically resolves and loads `tsconfig.json` based on the Webpack context.
 
 ### Configuration Options
 
-You can set options by passing them in with the query string.
+You can set options by using the query string.
 
 ```js
 loaders: [
