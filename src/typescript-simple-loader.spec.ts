@@ -41,6 +41,8 @@ function test (entryFile: string, expectedFile: string, options: any, done: Func
 }
 
 describe('fixtures', function () {
+  this.timeout(5000)
+
   it('simple', function (done) {
     test(
       join(FIXTURES_DIR, 'simple', 'source.ts'),
