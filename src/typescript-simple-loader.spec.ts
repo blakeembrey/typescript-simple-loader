@@ -87,4 +87,24 @@ describe('fixtures', function () {
       done
     )
   })
+
+  it('tsx', function (done) {
+    test(
+      join(FIXTURES_DIR, 'tsx', 'source.tsx'),
+      join(FIXTURES_DIR, 'tsx', 'output.js'),
+      {
+        context: join(FIXTURES_DIR, 'tsx'),
+        module: {
+          loaders: [
+            {
+              test: /\.tsx?$/,
+              loader: join(__dirname, '..') + '?compiler=ntypescript',
+              exclude: /node_modules/
+            }
+          ]
+        }
+      },
+      done
+    )
+  })
 })

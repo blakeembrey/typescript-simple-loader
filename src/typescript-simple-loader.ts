@@ -147,7 +147,7 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
   // Allow `configFile` option to override `tsconfig.json` lookup.
   const configFile = options.configFile ?
     resolve(context, options.configFile) :
-    findConfigFile(dirname(rootFile))
+    findConfigFile(context)
 
   let config = TS.parseConfigFile(readConfigFile(configFile, loader, TS), TS.sys, configFile)
 
