@@ -4,6 +4,7 @@ import { EOL } from 'os'
 import * as ts from 'typescript'
 import extend = require('xtend')
 import { parseQuery, urlToRequest } from 'loader-utils'
+import * as tsconfig from 'tsconfig'
 
 interface WebPackLoader {
   cacheable(flag?: boolean): void
@@ -96,31 +97,12 @@ function loader (content: string): void {
 }
 
 /**
- * Load a TypeScript configuration file.
- */
-function loadConfigFile (fileName: string): any {
-  return JSON.parse(readFileSync(fileName, 'utf-8'))
-}
-
-/**
  * Read the configuration into an object.
  */
-function readConfigFile (configFile: string, loader: WebPackLoader, TS: typeof ts) {
-  let config = {
-    files: <string[]> [],
+function readConfig (filename: string, loader: WebPackLoader, TS: typeof ts) {
+  const config = filename ? tsconfig.readFileSync(filename) : {
+    files: [],
     compilerOptions: {}
-  }
-
-  if (configFile) {
-    const tsconfig = loadConfigFile(configFile)
-    const configDir = dirname(configFile)
-
-    config = extend(config, tsconfig)
-
-    // Resolve and include `tsconfig.json` files.
-    if (Array.isArray(tsconfig.files)) {
-      config.files = config.files.map((file: string) => resolve(configDir, file))
-    }
   }
 
   // Merge all possible compiler options together.
@@ -131,7 +113,7 @@ function readConfigFile (configFile: string, loader: WebPackLoader, TS: typeof t
     sourceMap: loader.sourceMap
   })
 
-  return config
+  return TS.parseConfigFile(config, TS.sys, filename)
 }
 
 /**
@@ -146,10 +128,9 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
 
   // Allow `configFile` option to override `tsconfig.json` lookup.
   const configFile = options.configFile ?
-    resolve(context, options.configFile) :
-    findConfigFile(context)
+    resolve(context, options.configFile) : tsconfig.resolveSync(context)
 
-  let config = TS.parseConfigFile(readConfigFile(configFile, loader, TS), TS.sys, configFile)
+  const config = readConfig(configFile, loader, TS)
 
   // Emit configuration errors.
   config.errors.forEach((error: ts.Diagnostic) => {
@@ -326,29 +307,6 @@ function getLoaderInstance (loader: WebPackLoader): LoaderInstance {
  */
 function isDefinition (fileName: string): boolean {
   return /\.d\.ts$/.test(fileName)
-}
-
-/**
- * Find the root config file.
- */
-function findConfigFile (path: string): string {
-  var dir = statSync(path).isDirectory() ? path : dirname(path)
-
-  do {
-    const configFile = resolve(dir, 'tsconfig.json')
-
-    if (fileExists(configFile)) {
-      return configFile
-    }
-
-    const parentDir = dirname(dir)
-
-    if (dir === parentDir) {
-      return
-    }
-
-    dir = parentDir
-  } while (statSync(dir).isDirectory())
 }
 
 export = loader

@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "loader-utils": "^0.2.7",
+    "tsconfig": "^1.0.1",
     "xtend": "^4.0.0"
   }
 }
