@@ -122,13 +122,15 @@ function createInstance (loader: WebPackLoader, options: Options): LoaderInstanc
   const context = loader.context
   const rootFile = loader.resourcePath
   const files: FilesMap = {}
+  const ignoreWarnings = Array.isArray(options.ignoreWarnings) ? options.ignoreWarnings : []
 
   // Allow custom TypeScript compilers to be used.
   const TS: typeof ts = require(options.compiler || 'typescript')
 
   // Allow `configFile` option to override `tsconfig.json` lookup.
   const configFile = options.configFile ?
-    resolve(context, options.configFile) : tsconfig.resolveSync(context)
+    resolve(context, options.configFile) :
+    tsconfig.resolveSync(context)
 
   const config = readConfig(configFile, loader, TS)
 
@@ -215,10 +217,7 @@ function createInstance (loader: WebPackLoader, options: Options): LoaderInstanc
     program.getGlobalDiagnostics()
       .concat(program.getSemanticDiagnostics())
       .forEach((diagnostic) => {
-        if (
-          !Array.isArray(options.ignoreWarnings) ||
-          options.ignoreWarnings.indexOf(String(diagnostic.code)) === -1
-        ) {
+        if (ignoreWarnings.indexOf(String(diagnostic.code)) === -1) {
           compilation.warnings.push(new DiagnosticError(diagnostic, context, TS))
         }
       })
