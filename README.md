@@ -44,7 +44,7 @@ module.exports = {
 
 ### Load `tsconfig.json`
 
-The loader automatically resolves and loads `tsconfig.json` based on the Webpack context.
+The loader automatically resolves and parses `tsconfig.json`, based on the Webpack context, using [tsconfig](https://github.com/TypeStrong/tsconfig).
 
 ### Configuration Options
 
