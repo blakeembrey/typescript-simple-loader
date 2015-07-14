@@ -119,9 +119,10 @@ function readConfig (filename: string, loader: WebPackLoader, TS: typeof ts) {
 /**
  * Create a TypeScript language service from the first instance.
  */
-function createService (files: FilesMap, loader: WebPackLoader, options: Options) {
+function createInstance (loader: WebPackLoader, options: Options): LoaderInstance {
   const context = loader.context
   const rootFile = loader.resourcePath
+  const files: FilesMap = {}
 
   // Allow custom TypeScript compilers to be used.
   const TS: typeof ts = require(options.compiler || 'typescript')
@@ -233,7 +234,7 @@ function createService (files: FilesMap, loader: WebPackLoader, options: Options
     cb()
   })
 
-  return service
+  return { service, files }
 }
 
 /**
@@ -293,12 +294,8 @@ function getLoaderInstance (loader: WebPackLoader): LoaderInstance {
     return loaderInstances[id]
   }
 
-  const files: FilesMap = {}
-  const service = createService(files, loader, query)
-  const instance: LoaderInstance = { files, service }
-
+  const instance = createInstance(loader, query)
   loaderInstances[id] = instance
-
   return instance
 }
 
