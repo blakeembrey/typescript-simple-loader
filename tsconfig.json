@@ -11,6 +11,9 @@
   "files": [
     "src/typescript-simple-loader.ts",
     "src/typescript-simple-loader.spec.ts",
-    "typings/tsd.d.ts"
+    "typings/tsd.d.ts",
+    "src/typings/xtend.d.ts",
+    "src/typings/webpack.d.ts",
+    "src/typings/loader-utils.d.ts"
   ]
 }
