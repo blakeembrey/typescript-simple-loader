@@ -1,6 +1,5 @@
 import { resolve, relative, dirname } from 'path'
 import { readFileSync, statSync } from 'fs'
-import { EOL } from 'os'
 import * as ts from 'typescript'
 import extend = require('xtend')
 import { parseQuery, urlToRequest } from 'loader-utils'
@@ -180,7 +179,6 @@ function createInstance (loader: WebPackLoader, options: Options): LoaderInstanc
     },
     getCurrentDirectory: () => context,
     getScriptIsOpen: () => true,
-    getNewLine: () => EOL,
     getCompilationSettings: () => config.options,
     getDefaultLibFileName: (options: ts.CompilerOptions) => {
       return TS.getDefaultLibFilePath(config.options)
