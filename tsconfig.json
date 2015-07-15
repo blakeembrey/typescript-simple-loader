@@ -14,6 +14,7 @@
     "typings/tsd.d.ts",
     "src/typings/xtend.d.ts",
     "src/typings/webpack.d.ts",
-    "src/typings/loader-utils.d.ts"
+    "src/typings/loader-utils.d.ts",
+    "src/typings/arrify.d.ts"
   ]
 }

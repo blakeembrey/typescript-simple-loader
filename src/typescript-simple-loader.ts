@@ -4,6 +4,7 @@ import * as ts from 'typescript'
 import extend = require('xtend')
 import { parseQuery, urlToRequest } from 'loader-utils'
 import * as tsconfig from 'tsconfig'
+import arrify = require('arrify')
 
 interface WebPackLoader {
   cacheable(flag?: boolean): void
@@ -122,7 +123,7 @@ function createInstance (loader: WebPackLoader, options: Options): LoaderInstanc
   const context = loader.context
   const rootFile = loader.resourcePath
   const files: FilesMap = {}
-  const ignoreWarnings = Array.isArray(options.ignoreWarnings) ? options.ignoreWarnings : []
+  const ignoreWarnings = arrify(options.ignoreWarnings)
 
   // Allow custom TypeScript compilers to be used.
   const TS: typeof ts = require(options.compiler || 'typescript')
