@@ -258,7 +258,7 @@ function formatDiagnostic (diagnostic: ts.Diagnostic, TS: typeof ts): string {
     return `(${line + 1},${character + 1}): ${message} (${diagnostic.code})`
   }
 
-  return message
+  return `${message} (${diagnostic.code})`
 }
 
 /**
