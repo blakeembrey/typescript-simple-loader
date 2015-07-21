@@ -1,6 +1,6 @@
 {
   "name": "typescript-simple-loader",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Feature complete TypeScript loader for webpack",
   "main": "dist/typescript-simple-loader.js",
   "files": [
