@@ -47,16 +47,16 @@
   "homepage": "https://github.com/blakeembrey/typescript-simple-loader",
   "devDependencies": {
     "chai": "^3.0.0",
-    "istanbul": "gotwarlost/istanbul#source-map",
+    "istanbul": "^0.3.17",
     "mocha": "^2.1.0",
     "node-libs-browser": "^0.5.2",
     "ntypescript": "^1.201507071002.1",
     "pre-commit": "^1.0.6",
-    "typescript": "git://github.com/Microsoft/TypeScript.git#release-1.5",
+    "typescript": "^1.5.3",
     "webpack": "^1.10.1"
   },
   "peerDependencies": {
-    "typescript": "^1.5.0-alpha"
+    "typescript": "^1.5.0"
   },
   "dependencies": {
     "arrify": "^1.0.0",
