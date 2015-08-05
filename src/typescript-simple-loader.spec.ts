@@ -52,6 +52,17 @@ describe('fixtures', function () {
     )
   })
 
+  it('source map', function (done) {
+    test(
+      join(FIXTURES_DIR, 'source-map', 'source.ts'),
+      join(FIXTURES_DIR, 'source-map', 'output.js'),
+      {
+        devtool: 'inline-source-map'
+      },
+      done
+    )
+  })
+
   it('ntypescript', function (done) {
     test(
       join(FIXTURES_DIR, 'simple', 'source.ts'),

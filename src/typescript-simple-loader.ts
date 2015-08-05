@@ -110,7 +110,10 @@ function readConfig (filename: string, loader: WebPackLoader, TS: typeof ts) {
     target: 'es5',
     module: 'commonjs'
   }, config.compilerOptions, {
-    sourceMap: loader.sourceMap
+    sourceMap: loader.sourceMap,
+    inlineSourceMap: false,
+    inlineSources: false,
+    declaration: false
   })
 
   return TS.parseConfigFile(config, TS.sys, filename)
@@ -181,7 +184,6 @@ function createInstance (loader: WebPackLoader, options: Options): LoaderInstanc
       delete files[fileName]
     },
     getCurrentDirectory: () => context,
-    getScriptIsOpen: () => true,
     getCompilationSettings: () => config.options,
     getDefaultLibFileName: (options: ts.CompilerOptions) => {
       return TS.getDefaultLibFilePath(config.options)
@@ -285,7 +287,7 @@ class DiagnosticError implements Error {
  * @return {LoaderInstance}
  */
 function getLoaderInstance (loader: WebPackLoader): LoaderInstance {
-  const id = loader.options.context + loader.query
+  const id = loader.options.context + loader.sourceMap + loader.query
   const query = parseQuery(loader.query)
 
   if (loaderInstances[id]) {
