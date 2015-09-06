@@ -11,8 +11,11 @@
 
 ## Installation
 
-```
+```sh
 npm install typescript-simple-loader --save
+
+# Make sure your TypeScript-compatible compiler is installed.
+npm install typescript --save
 ```
 
 ## Features

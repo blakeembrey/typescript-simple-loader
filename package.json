@@ -52,9 +52,6 @@
     "typescript": "^1.5.3",
     "webpack": "^1.10.1"
   },
-  "peerDependencies": {
-    "typescript": "*"
-  },
   "dependencies": {
     "arrify": "^1.0.0",
     "loader-utils": "^0.2.7",
