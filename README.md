@@ -5,7 +5,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-> Feature complete TypeScript loader for webpack.
+> Feature complete TypeScript loader for webpack. **Works with `typescript@>=1.5`**.
 
 ![Webpack Hot Module Replacement with TypeScript](https://github.com/blakeembrey/typescript-simple-loader/raw/master/screenshot.png)
 
