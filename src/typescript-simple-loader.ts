@@ -34,7 +34,7 @@ interface SourceMap {
 interface Options {
   compiler?: string
   configFile?: string
-  ignoreWarnings?: string[]
+  ignoreWarnings?: (string | number)[]
 }
 
 type FilesMap = ts.Map<{ version: number, text: string }>
@@ -126,7 +126,7 @@ function createInstance (loader: WebPackLoader, options: Options): LoaderInstanc
   const context = loader.context
   const rootFile = loader.resourcePath
   const files: FilesMap = {}
-  const ignoreWarnings = arrify(options.ignoreWarnings)
+  const ignoreWarnings = arrify(options.ignoreWarnings).map(Number)
 
   // Allow custom TypeScript compilers to be used.
   const TS: typeof ts = require(options.compiler || 'typescript')
@@ -220,7 +220,7 @@ function createInstance (loader: WebPackLoader, options: Options): LoaderInstanc
     program.getGlobalDiagnostics()
       .concat(program.getSemanticDiagnostics())
       .forEach((diagnostic) => {
-        if (ignoreWarnings.indexOf(String(diagnostic.code)) === -1) {
+        if (ignoreWarnings.indexOf(diagnostic.code) === -1) {
           compilation.warnings.push(new DiagnosticError(diagnostic, context, TS))
         }
       })
