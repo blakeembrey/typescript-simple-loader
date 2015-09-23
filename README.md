@@ -28,16 +28,18 @@ npm install typescript --save
 
 ## Usage
 
+Add typescript as a resolvable extension and specify this as the loader for those extensions.
+
 ```js
 module.exports = {
   entry: './main.ts',
   resolve: {
-    extensions: ['', '.ts', '.js']
+    extensions: ['', '.ts', '.tsx', '.js']
   },
   module: {
     loaders: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         loader: 'typescript-simple-loader'
       }
     ]
