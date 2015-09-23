@@ -44,10 +44,10 @@
 /* 0 */
 /***/ function(module, exports) {
 
-	/// <reference path="react-jsx.d.ts" />
 	function render() {
 	    return React.createElement("div", null, "Test");
 	}
+	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = render;
 
 
