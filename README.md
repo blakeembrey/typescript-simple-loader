@@ -1,5 +1,7 @@
 # TypeScript Simple Loader
 
+**Deprecated: Please use [ts-loader](https://github.com/TypeStrong/ts-loader)**
+
 [![NPM version][npm-image]][npm-url]
 [![NPM downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
