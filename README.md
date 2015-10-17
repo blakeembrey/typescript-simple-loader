@@ -60,7 +60,7 @@ You can set options by using the query string.
 ```js
 loaders: [
   {
-    test: /\.ts$/,
+    test: /\.tsx?$/,
     loader: 'typescript-simple-loader?compiler=ntypescript&configFile=tsconfig.json&ignoreWarnings[]=2304'
   }
 ]
