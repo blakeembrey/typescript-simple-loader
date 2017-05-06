@@ -1,5 +1,7 @@
 # TypeScript Simple Loader
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/blakeembrey/typescript-simple-loader.svg)](https://greenkeeper.io/)
+
 **Deprecated: Please use [ts-loader](https://github.com/TypeStrong/ts-loader)**
 
 [![NPM version][npm-image]][npm-url]
